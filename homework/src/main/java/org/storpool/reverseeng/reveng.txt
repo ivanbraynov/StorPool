@@ -1,0 +1,206 @@
+1. Downloaded the binary file
+2. Installed WSL with Ubuntu on my Windows machine
+3. Opened the linux VM machine
+4. Navigated to the downloaded file
+5. Extracted it with tar -xzf binaries.tgz -C .
+6. Ran file <a/b> to see what are they
+    a: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, for GNU/Linux 3.2.0, BuildID[sha1]=f78fa493787cd1a399b33b8c872299feabab709c, stripped
+    b: ELF 64-bit LSB executable, x86-64, version 1 (GNU/Linux), statically linked, for GNU/Linux 2.6.32, BuildID[sha1]=cffb08c07ba5e0fcd6c0860760955dab0b8c1707, stripped
+7. Ran ls -la to check the files permissions
+8. Made them executable with chmod +x
+9. Tried running the files with ./a and ./b but got: Segmentation fault (core dumped)
+10. Downloaded gdb and tried running them but found (No debugging symbols found in a/b) maybe because the files are stripped
+11. Downloaded strace and ran the files again
+
+strace ./a:
+execve("./a", ["./a"], 0x7ffef21a67d0 /* 26 vars */) = 0
+brk(NULL)                               = 0x123c000
+brk(0x123d1c0)                          = 0x123d1c0
+arch_prctl(ARCH_SET_FS, 0x123c880)      = 0
+uname({sysname="Linux", nodename="DESKTOP-DULD4RP", ...}) = 0
+readlink("/proc/self/exe", "/mnt/c/Users/Ivan/Downloads/extr"..., 4096) = 39
+brk(0x125e1c0)                          = 0x125e1c0
+brk(0x125f000)                          = 0x125f000
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "./pesho", O_RDONLY)   = -1 ENOENT (No such file or directory)
+read(-1, 0x7ffe86fc8970, 1024)          = -1 EBADF (Bad file descriptor)
+close(-1)                               = -1 EBADF (Bad file descriptor)
+--- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=NULL} ---
++++ killed by SIGSEGV (core dumped) +++
+Segmentation fault (core dumped)
+
+12. I saw that the program was looking for a file ./pesho
+13. Created the file in the same directory touch ./pesho
+14. Ran the program again ./a but nothing happened
+15. Ran with strace ./a
+
+execve("./a", ["./a"], 0x7ffc35fa29f0 /* 26 vars */) = 0
+brk(NULL)                               = 0x1ae9000
+brk(0x1aea1c0)                          = 0x1aea1c0
+arch_prctl(ARCH_SET_FS, 0x1ae9880)      = 0
+uname({sysname="Linux", nodename="DESKTOP-DULD4RP", ...}) = 0
+readlink("/proc/self/exe", "/mnt/c/Users/Ivan/Downloads/extr"..., 4096) = 39
+brk(0x1b0b1c0)                          = 0x1b0b1c0
+brk(0x1b0c000)                          = 0x1b0c000
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+openat(AT_FDCWD, "./pesho", O_RDONLY)   = 3
+read(3, "", 1024)                       = 0
+close(3)                                = 0
+exit_group(0)                           = ?
++++ exited with 0 +++
+
+16. We can assume that the program was executed correctly since I got exited with 0
+17. I installed ghydra for further debugging
+18. I looked for .text and found this function which seams that just returns
+void FUN_004010d0(void)
+{
+  return;
+}
+19. Looked for something related to .pesho in the defined strings which at the end returns 0
+undefined8
+FUN_004016fd(undefined8 param_1,undefined8 param_2,undefined8 param_3,undefined8 param_4,
+            undefined8 param_5,undefined8 param_6,undefined8 param_7,undefined8 param_8,
+            undefined8 param_9,undefined8 param_10,undefined8 param_11,undefined8 param_12,
+            undefined **param_13,char *param_14)
+
+{
+  ulong uVar1;
+  byte *pbVar2;
+  undefined *puVar3;
+  ulong uVar4;
+  undefined8 uVar5;
+  undefined8 extraout_RDX;
+  long lVar6;
+  undefined *puVar7;
+  undefined8 *puVar8;
+  undefined8 *puVar9;
+  byte bVar10;
+  undefined8 extraout_XMM0_Qa;
+  undefined8 uVar11;
+  undefined in_stack_fffffffffffffbd8;
+  undefined7 uStack_427;
+  undefined8 local_30;
+  uint local_c;
+
+  bVar10 = 0;
+  FUN_0043c350("./pesho",0,param_11,param_12,(ulong)param_13,param_14,in_stack_fffffffffffffbd8);
+  puVar3 = &stack0xfffffffffffffbd8;
+  puVar7 = puVar3;
+  uVar1 = FUN_0043c510();
+  FUN_0043c8b0();
+  pbVar2 = FUN_00414e30(uVar1,puVar7,extraout_RDX,puVar3,(byte *)param_13,param_14);
+  *(ulong *)pbVar2 = CONCAT71(uStack_427,in_stack_fffffffffffffbd8);
+  *(undefined8 *)(pbVar2 + 0x3f8) = local_30;
+  lVar6 = (long)pbVar2 - (long)((ulong)(pbVar2 + 8) & 0xfffffffffffffff8);
+  puVar8 = (undefined8 *)(&stack0xfffffffffffffbd8 + -lVar6);
+  puVar9 = (undefined8 *)((ulong)(pbVar2 + 8) & 0xfffffffffffffff8);
+  for (uVar4 = (ulong)((int)lVar6 + 0x400U >> 3); uVar4 != 0; uVar4 = uVar4 - 1) {
+    *puVar9 = *puVar8;
+    puVar8 = puVar8 + (ulong)bVar10 * -2 + 1;
+    puVar9 = puVar9 + (ulong)bVar10 * -2 + 1;
+  }
+  uVar5 = 0;
+  uVar11 = extraout_XMM0_Qa;
+  for (local_c = 0; (ulong)(long)(int)local_c < uVar1; local_c = local_c + 1) {
+    uVar11 = FUN_004085d0(uVar11,param_2,param_3,param_4,param_5,param_6,param_7,param_8,
+                          (byte ***********)"%d %d\n",(ulong)local_c,
+                          (ulong)(uint)(int)(char)pbVar2[(int)local_c],uVar5,param_13,param_14,
+                          in_stack_fffffffffffffbd8);
+  }
+  return 0;
+}
+
+20. Tried adding something to pesho: echo "1111" >> pesho
+21. Ran again ./a but got an error:
+a: malloc.c:2401: sysmalloc: Assertion `(old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)' failed.
+Aborted (core dumped)
+------------------------------------------
+22. Now let's check file ./b
+23. I removed the pesho file with rm pesho
+24. Ran ./b and got:
+Segmentation fault (core dumped)
+25. strace ./b
+execve("./b", ["./b"], 0x7ffdc2dcbdc0 /* 26 vars */) = 0
+uname({sysname="Linux", nodename="DESKTOP-DULD4RP", ...}) = 0
+brk(NULL)                               = 0x9d0000
+brk(0x9d11c0)                           = 0x9d11c0
+arch_prctl(ARCH_SET_FS, 0x9d0880)       = 0
+readlink("/proc/self/exe", "/mnt/c/Users/Ivan/Downloads/extr"..., 4096) = 39
+brk(0x9f21c0)                           = 0x9f21c0
+brk(0x9f3000)                           = 0x9f3000
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+--- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=NULL} ---
++++ killed by SIGSEGV (core dumped) +++
+Segmentation fault (core dumped)
+26. Couldn't find something interesting that might have been causing the issue.
+27. killed by SIGSEGV means some issue with the memory maybe because si_addr=NULL and it tries to read from it
+28. nohwcap should not be a problem as it's used for disabling hardware capability optimisations
+29. Ran  gdb
+(gdb) run
+Starting program: /mnt/c/Users/Ivan/Downloads/extracted/b
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000400b67 in ?? ()
+30. Found these functions in ".text" and "entry"
+void FUN_004003b0(int param_1,char param_2,undefined4 param_3)
+
+{
+  int iVar1;
+  undefined auStack_618 [8];
+  undefined local_610 [1528];
+
+  if (((1 < param_1) && (param_2 != '\0')) && (iVar1 = FUN_00434f90(auStack_618,0x40), 2 < iVar1)) {
+    syscall();
+    FUN_00434ff0(local_610,iVar1 + -1,param_3);
+    syscall();
+    syscall();
+    syscall();
+    syscall();
+  }
+  return;
+}
+
+void processEntry entry(undefined8 param_1,undefined8 param_2)
+
+{
+  undefined auStack_8 [8];
+
+  FUN_00400ff0(FUN_00400aae,param_2,&stack0x00000008,FUN_00401700,FUN_00401790,param_1,auStack_8);
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+
+{
+  char local_58 [64];
+  char *local_18;
+  uint local_10;
+  int local_c;
+
+  builtin_strncpy(local_58,"momdkvjhradj|l|`|ps~u{w~vjnrr|?",0x20);
+  local_c = 0;
+  thunk_FUN_0041ada0(local_58 + 0x20,0,0x20);
+  local_18 = (char *)FUN_00406c70("TMPDIR");
+  if (*local_18 == '/') {
+    local_c = local_c + 1;
+  }
+  FUN_004077c0("Init done %d .\n",local_c);
+  FUN_004077c0("Enter password: ");
+  FUN_00407e50(local_58 + 0x20,0x1f,PTR_DAT_006b2748);
+  FUN_00408500(10);
+  for (local_10 = 0; (int)local_10 < 0x1e; local_10 = local_10 + 1) {
+    if (((int)local_58[(long)(int)local_10 + 0x20] ^ local_10) != (int)local_58[(int)local_10]) {
+      FUN_004082f0("WRONG");
+      FUN_00406e80(4);
+    }
+  }
+  FUN_004082f0(&DAT_00489cd2);
+  return 0;
+}
+
+31. It initializes temp dir, asks for a password, but I cannot understand what else is doing
+momdkvjhradj|l|`|ps~u{w~vjnrr|?
+32. For this stack in the line here FUN_00400ff0(FUN_00400aae,param_2,&stack0x00000008,FUN_00401700,FUN_00401790,param_1,auStack_8);
+I got address not found in the memory, but probably this is not related
+
+
+
