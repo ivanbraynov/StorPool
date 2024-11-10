@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.Test;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -18,11 +19,10 @@ public class FizzBuzzTest {
     The best I did is use only one % and ==
     For the print I am not using for loops, but just a simple join
  */
-        Map<Integer, String> replacements = Map.of(
-                15, "AB",
-                3, "A",
-                5, "B"
-        );
+        Map<Integer, String> replacements = new LinkedHashMap<>();
+        replacements.put(15, "AB");
+        replacements.put(3, "A");
+        replacements.put(5, "B");
 
         List<String> values = IntStream.rangeClosed(1, 100).
                 mapToObj(i -> replacements.entrySet()
