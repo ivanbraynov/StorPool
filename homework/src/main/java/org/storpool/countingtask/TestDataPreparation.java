@@ -1,5 +1,7 @@
 package org.storpool.countingtask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -9,11 +11,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class TestDataPreparation {
-    private static final Logger logger = Logger.getLogger(TestDataPreparation.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(TestDataPreparation.class);
 
     public List<Long> getValuesFromFile(String filePath) {
         List<Long> values = new ArrayList<>();
@@ -25,7 +25,7 @@ public class TestDataPreparation {
             }
             logger.info("Finished reading data from file.");
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error reading from file: " + filePath, e);
+            logger.error("Error reading from file: {}", filePath, e);
         }
         return values;
     }
@@ -37,9 +37,9 @@ public class TestDataPreparation {
                 int unsignedIntValue = random.nextInt();
                 dos.writeInt(unsignedIntValue);
             }
-            logger.info("File creation completed successfully with " + numberOfValues + " values.");
+            logger.info("File creation completed successfully with {} values", numberOfValues);
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Error writing to file: " + filePath, e);
+            logger.error("Error writing to file: {}", filePath, e);
         }
     }
 }

@@ -1,13 +1,13 @@
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
 
+@Slf4j
 public class FizzBuzzTest {
-    private static final Logger logger = Logger.getLogger(FizzBuzzTest.class.getName());
 
     @Test
     public void fizzBuzzPrint() {
@@ -34,6 +34,6 @@ public class FizzBuzzTest {
                 .toList();
 
 
-        logger.info(String.join("\n", values));
+        log.info("\n{}", String.join("\n", values));
     }
 }

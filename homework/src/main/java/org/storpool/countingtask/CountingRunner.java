@@ -1,10 +1,11 @@
 package org.storpool.countingtask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class CountingRunner {
-    private static final Logger logger = Logger.getLogger(CountingRunner.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(CountingRunner.class.getName());
     private final TestDataPreparation dataPreparation;
     private final NumberAnalysis numberAnalysis;
 
@@ -24,7 +25,7 @@ public class CountingRunner {
         String filePath = "int-numbers.dat";
         dataPreparation.createDataFile(1_000_000_000, filePath);
         List<Long> values = dataPreparation.getValuesFromFile(filePath);
-        logger.info(String.format("%d unique numbers", numberAnalysis.countDistinctNumbers(values)));
-        logger.info(String.format("%d numbers seen only once", numberAnalysis.countUniqueNumbers(values)));
+        logger.info("{} unique numbers", numberAnalysis.countDistinctNumbers(values));
+        logger.info("{} numbers seen only once", numberAnalysis.countUniqueNumbers(values));
     }
 }
